@@ -1,11 +1,9 @@
 package daily;
 
+import test.entity.Student;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * @author ZhangD
@@ -50,6 +48,7 @@ public class ManageItinerary {
         List<String> ticket3 = new ArrayList<>();
         List<String> ticket4 = new ArrayList<>();
         List<String> ticket5 = new ArrayList<>();
+        List<Student> students = new ArrayList<>();
         ticket1.add(0,"JFK");
         ticket1.add(1,"ABC");
         ticket2.add(0,"ABC");
