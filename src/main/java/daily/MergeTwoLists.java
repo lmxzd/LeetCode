@@ -93,7 +93,7 @@ public class MergeTwoLists {
             prev = prev.next;
         }
         //最后l1,l2只会有一个为空,不为空的作为最大值加到prev的next节点上.
-        prev.next = l1 == null ? l2 : l1;
+        prev.next = (l1 == null) ? l2 : l1;
         return preHead.next;
     }
 
