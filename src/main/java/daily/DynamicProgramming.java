@@ -11,7 +11,7 @@ import java.util.List;
  * @since 2021-01-04
  * 动态规划相关题目
  */
-@Slf4j
+// @Slf4j
 public class DynamicProgramming {
 
     /**
@@ -229,37 +229,97 @@ public class DynamicProgramming {
      */
     static class SplitPalindromeString {
         public static void main(String[] args) {
+            //字符串操作小节一下 --和++在一开始也会判断是否还需进行以下其他的运算.没必要的运算会直接跳出.不是的,只要第一次判断不通过,直接跳出.
+            // String s = "";
+            // char c = s.charAt(0);
+            // String[] split = s.split("");
+            // int i;
+            // for (i = 0; i < split.length; i++) {
+            //     System.out.println(i);
+            // }
+            // System.out.println(i);
+            // System.out.println(split.length);
+            // int cursor = 0;
+            // double j = cursor + 0.5;
+            // System.out.println(j == 0.5);
 
-            String s = "char1";
-            char c = s.charAt(0);
-            String[] split = s.split("");
-            int i;
-            for (i = 0; i < split.length; i++) {
-                System.out.println(i);
-            }
-            System.out.println(i);
-            System.out.println(Arrays.toString(split));
+            String s = "abccba";
+            List<List<String>> partition = partition(s);
+            System.out.println(partition);
         }
 
-        public List<List<String>> partition(String s) {
-            List result = new ArrayList();
+        public static List<List<String>> partition(String s) {
+            List<List<String>> result = new ArrayList<>();
+            //java二维数组怎么初始化.除了原始初始化之外.
             boolean[][] status = new boolean[s.length()][s.length()];
-            Arrays.fill(status, true);
             String[] baseArray = s.split("");
             int length = baseArray.length;
             //转换为半矩阵
             for (int i = 0; i < length; i++) {
-                for (int j = length - i; j > i; j--) {
+                for (int j = length - 1; j >= i; j--) {
                     status[i][j] = baseArray[i].equals(baseArray[j]);
                 }
             }
-            //半矩阵上的点,做垂线
+            result.add(Arrays.asList(baseArray));
+            //半矩阵上的点,做垂线,对角线是以0.5走的.
             int cursor = 0;
-            for (double i = 0, j = 0; i < status.length && j < status.length; i = i + 0.5, j = j + 0.5) {
+            for (double i = 0, j = 0; i <= status.length - 1 && j <= status.length - 1; i = i + 0.5, j = j + 0.5) {
+                int m;
+                int n;
                 if (i == cursor + 0.5) {
-
+                    cursor++;
+                    for (m = (int) (i - 0.5), n = (int) (j + 0.5); m > 0 && n < s.length(); m--, n++) {
+                        List<String> list = new ArrayList<>();
+                        if (status[m][n]) {
+                            if (m != n) {
+                                String substring = s.substring(m, n + 1);
+                                list.add(substring);
+                                String[] before = s.substring(0, m).split("");
+                                String[] after = s.substring(n + 1).split("");
+                                //截取的空串也会变成数组,不过length为1(实际是个空的),也可以asList,这个时候list是个空list
+                                if (before.length != 1) {
+                                    list.addAll(Arrays.asList(before));
+                                }
+                                if (after.length != 1) {
+                                    list.addAll(Arrays.asList(after));
+                                }
+                                result.add(list);
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    for (m = (int) i, n = (int) j; m > 0 && n < s.length(); m--, n++) {
+                        List<String> list = new ArrayList<>();
+                        if (status[m][n]) {
+                            if (m != n) {
+                                String substring = s.substring(m, n);
+                                list.add(substring);
+                                String[] before = s.substring(0, m).split("");
+                                String[] after = s.substring(n).split("");
+                                list.addAll(Arrays.asList(before));
+                                list.addAll(Arrays.asList(after));
+                                if (before.length != 0) {
+                                    list.addAll(Arrays.asList(before));
+                                }
+                                if (after.length != 0) {
+                                    list.addAll(Arrays.asList(after));
+                                }
+                                result.add(list);
+                            }
+                        } else {
+                            break;
+                        }
+                    }
                 }
             }
+            return result;
         }
     }
+
+    private static void findPalindrome(String s, List<List<String>> result, boolean status, int m, int n) {
+
+    }
 }
+
