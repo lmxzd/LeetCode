@@ -1,21 +1,16 @@
 package daily;
 
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ZhangD
  * @since 2021-01-04
  * 动态规划相关题目
  */
-// @Slf4j
 public class DynamicProgramming {
 
     /**
-     * 1.Fibonacci sequence 斐波那契数列
+     * 1.Fibonacci sequence 斐波那契数列(509)
      * 通常用 F(n) 表示，形成的序列称为 斐波那契数列 。该数列由 0 和 1 开始，后面的每一项数字都是前面两项数字的和
      * 求数列的第n个数的值
      */
@@ -126,7 +121,7 @@ public class DynamicProgramming {
     }
 
     /**
-     * 2.凑零钱问题
+     * 2.凑零钱问题(322)
      * 给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。
      * 如果没有任何一种硬币组合能组成总金额，返回 -1。
      * 每种硬币的数量是无限的。所以n和n-i(状态)的状态之间互不影响,说明具有最优子结构.符合动态规划问题.
@@ -229,97 +224,62 @@ public class DynamicProgramming {
      */
     static class SplitPalindromeString {
         public static void main(String[] args) {
-            //字符串操作小节一下 --和++在一开始也会判断是否还需进行以下其他的运算.没必要的运算会直接跳出.不是的,只要第一次判断不通过,直接跳出.
-            // String s = "";
-            // char c = s.charAt(0);
-            // String[] split = s.split("");
-            // int i;
-            // for (i = 0; i < split.length; i++) {
-            //     System.out.println(i);
-            // }
-            // System.out.println(i);
-            // System.out.println(split.length);
-            // int cursor = 0;
-            // double j = cursor + 0.5;
-            // System.out.println(j == 0.5);
-
-            String s = "abccba";
+            String s = "aaa";
             List<List<String>> partition = partition(s);
             System.out.println(partition);
         }
 
+        /**
+         * 算是先用动态规划减少重复问题,然后再用回溯来解答.
+         * @param s
+         * @return
+         */
         public static List<List<String>> partition(String s) {
             List<List<String>> result = new ArrayList<>();
             //java二维数组怎么初始化.除了原始初始化之外.
-            boolean[][] status = new boolean[s.length()][s.length()];
+            int length = s.length();
+            boolean[][] dpTable = new boolean[length][length];
             String[] baseArray = s.split("");
-            int length = baseArray.length;
-            //转换为半矩阵
-            for (int i = 0; i < length; i++) {
-                for (int j = length - 1; j >= i; j--) {
-                    status[i][j] = baseArray[i].equals(baseArray[j]);
+            //之前转换为的矩阵,有点半递归,半动态规划,没有达到直接记录整个的目的.现在的才是好的.
+            //双层循环从里往外走,可以确保里面的都是比较过的,所以可以直接拿来用,这属于是dpTable的一种设计,怎么方便怎么来.
+            //是为了减少重复比较,设计的一个矩阵.直接拿矩阵中的值来确定是否是回文.
+            for (int right = 0; right < length; right++) {
+                for (int left = 0; right >= left; left++) {
+                    //子问题就是往中间夹一次的串是回文串.这个子问题是一个涉及上下级联动的问题.
+                    dpTable[left][right] = baseArray[right].equals(baseArray[left]) && (right - left <= 2 || dpTable[left + 1][right - 1]);
                 }
             }
-            result.add(Arrays.asList(baseArray));
-            //半矩阵上的点,做垂线,对角线是以0.5走的.
-            int cursor = 0;
-            for (double i = 0, j = 0; i <= status.length - 1 && j <= status.length - 1; i = i + 0.5, j = j + 0.5) {
-                int m;
-                int n;
-                if (i == cursor + 0.5) {
-                    cursor++;
-                    for (m = (int) (i - 0.5), n = (int) (j + 0.5); m > 0 && n < s.length(); m--, n++) {
-                        List<String> list = new ArrayList<>();
-                        if (status[m][n]) {
-                            if (m != n) {
-                                String substring = s.substring(m, n + 1);
-                                list.add(substring);
-                                String[] before = s.substring(0, m).split("");
-                                String[] after = s.substring(n + 1).split("");
-                                //截取的空串也会变成数组,不过length为1(实际是个空的),也可以asList,这个时候list是个空list
-                                if (before.length != 1) {
-                                    list.addAll(Arrays.asList(before));
-                                }
-                                if (after.length != 1) {
-                                    list.addAll(Arrays.asList(after));
-                                }
-                                result.add(list);
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                } else {
-                    for (m = (int) i, n = (int) j; m > 0 && n < s.length(); m--, n++) {
-                        List<String> list = new ArrayList<>();
-                        if (status[m][n]) {
-                            if (m != n) {
-                                String substring = s.substring(m, n);
-                                list.add(substring);
-                                String[] before = s.substring(0, m).split("");
-                                String[] after = s.substring(n).split("");
-                                list.addAll(Arrays.asList(before));
-                                list.addAll(Arrays.asList(after));
-                                if (before.length != 0) {
-                                    list.addAll(Arrays.asList(before));
-                                }
-                                if (after.length != 0) {
-                                    list.addAll(Arrays.asList(after));
-                                }
-                                result.add(list);
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
+            //涉及到回溯,所以用一个stack就可以了,只有在最后才用copy一下.用path记录路径
+            //deque, 双向队列.
+            Deque<String> path = new ArrayDeque<>();
+            backtracking(s, 0, length, dpTable, path, result);
             return result;
         }
-    }
 
-    private static void findPalindrome(String s, List<List<String>> result, boolean status, int m, int n) {
+        private static void backtracking(String s, int start, int length, boolean[][] dpTable, Deque<String> path,
+                                         List<List<String>> result) {
+            //递归终止条件.return弹栈.
+            if (start == length) {
+                result.add(new ArrayList<>(path));
+                return;
+            }
 
+            //为什么用for循环,是因为是树的中序遍历(更准确的说法应该是在同一个节点,先前序,再后序),而且又没有多次递归,就用for循环优化掉了,
+            // 其实也可以在里面在进行多次递归,就像二叉树的遍历一样.但和二叉树的遍历又不太一样,二叉树是固定的二叉,这个可能有多个分支.
+            // 用for和变量控制是比较好的一种方式.
+            //for循环遍历所有的树枝.
+            for (int i = start; i < length; i++) {
+                // 剪枝,无用的去掉,continue跳过这个树枝,找下一个树枝
+                if (!dpTable[start][i]) {
+                    continue;
+                }
+                path.addLast(s.substring(start, i + 1));
+                //截取一个回文串之后之后,就把这个记录到deque中,然后从回文串接下来的下一个字符进入下一个递归树.
+                backtracking(s, i + 1, length, dpTable, path, result);
+                //因为要回溯回去,所以需要把前一个记录的路径去掉(去掉之后path少了,可供使用的就多了),以备下一个兄弟树枝使用.
+                path.removeLast();
+            }
+        }
     }
 }
 
