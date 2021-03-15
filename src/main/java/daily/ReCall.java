@@ -14,13 +14,13 @@ public class ReCall {
     static class AllPermute {
         public static void main(String[] args) {
             int[] array = {1, 2, 3};
-            List<List<Integer>> permute = permute(array);
-            System.out.println(permute);
+            // List<List<Integer>> permute = permute(array);
+            // System.out.println(permute);
         }
 
-        private static List<List<Integer>> permute(int[] array) {
-
-        }
+        // private static List<List<Integer>> permute(int[] array) {
+        //
+        // }
 
     }
 }
