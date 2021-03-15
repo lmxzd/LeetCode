@@ -86,13 +86,14 @@ public class MergeTwoLists {
                 l1 = l1.next;
             }
             /*
-             * while循环结束之后preHead引用释放,preHead还是指向原有的-1,但是内部结构已经通过这种形式模仿指针把对象串起来形成链表.
+             * 引用指向引用的情况,看成引用指向第一个引用的对象(也就是值传递),preHead的内部结构已经通过这种形式模仿指针把对象串起来形成链表.
              * 等号理解为指向最好,此外,如果while循环外层依旧需要用到preHead,就可以在while循环外声明一个引用.这样就可以既不影响原有
              * 值,也可以在while循环外用到这个值.
              */
             prev = prev.next;
         }
         //最后l1,l2只会有一个为空,不为空的作为最大值加到prev的next节点上.
+        //迭代和判断是不会释放栈空间的.
         prev.next = (l1 == null) ? l2 : l1;
         return preHead.next;
     }
