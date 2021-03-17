@@ -107,22 +107,51 @@ class Symmetric {
  * 二叉树的层次遍历
  */
 class LevelOrder {
+    /**
+     * 利用队列的特性.
+     *
+     * @param root
+     * @return
+     */
     public int[] levelOrder(TreeNode root) {
-        if(root == null) return new int[0];
-        Queue<TreeNode> queue = new LinkedList<TreeNode>(){{ add(root); }};
+        if (root == null) {
+            return new int[0];
+        }
+        Queue<TreeNode> queue = new LinkedList<TreeNode>() {{
+            add(root);
+        }};
         ArrayList<Integer> ans = new ArrayList<>();
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
+            //1.可以利用队列的特性去除这个for循环.
+            // int size = queue.size();
+            // for (int i = 0; i < size; i++) {
+            //     TreeNode node = queue.poll();
+            //     ans.add(node.val);
+            //     if (node.left != null) {
+            //         queue.add(node.left);
+            //     }
+            //     if (node.right != null) {
+            //         queue.add(node.right);
+            //     }
+            // }
+            //2.充分利用队列的特性.
             TreeNode node = queue.poll();
             ans.add(node.val);
-            if(node.left != null) queue.add(node.left);
-            if(node.right != null) queue.add(node.right);
+            if (node.left != null) {
+                queue.add(node.left);
+            }
+            if (node.right != null) {
+                queue.add(node.right);
+            }
         }
         int[] res = new int[ans.size()];
-        for(int i = 0; i < ans.size(); i++)
+        for (int i = 0; i < ans.size(); i++) {
             res[i] = ans.get(i);
+        }
         return res;
     }
 }
+
 /**
  * 树的深度.
  */
@@ -231,19 +260,19 @@ class BuildTree {
 }
 
 class IsBalanced {
-    public boolean isBalanced(TreeNode root) {
-
+    public static boolean isBalanced(TreeNode root) {
+        return deep(root) != -1;
     }
 
-    private int deepDiff(TreeNode root) {
+    private static int deep(TreeNode root) {
         if (root == null) {
             return 0;
         }
-        int leftDeep = deepDiff(root.left);
+        int leftDeep = deep(root.left);
         if (leftDeep == -1) {
             return -1;
         }
-        int rightDeep = deepDiff(root.right);
+        int rightDeep = deep(root.right);
         if (rightDeep == -1) {
             return -1;
         }
