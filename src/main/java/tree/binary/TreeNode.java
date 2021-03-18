@@ -20,6 +20,15 @@ public class TreeNode {
         this.left = left;
         this.right = right;
     }
+
+    @Override
+    public String toString() {
+        return "TreeNode{" +
+                "value=" + value +
+                ", left=" + left +
+                ", right=" + right +
+                '}';
+    }
 }
 
 /**
@@ -126,24 +135,47 @@ class TreeDeep {
     }
 }
 
+/**
+ * 1.首先判断是分治,分析题意写逻辑(最为复杂)
+ * 2.然后有左子树,右子树,会列出树状递归.分析应该在树状递归何处(前,中,后)进行剩余的逻辑.
+ */
 class BuildTree {
-    public TreeNode buildTree(int[] preorder, int[] inorder) {
-        Map<Integer, Integer> preMap = new HashMap<>();
-        Map<Integer, Integer> inMap = new HashMap<>();
-        for (int i = 0; i < preorder.length; i++) {
-            preMap.put(preorder[i], i);
-        }
+    static Map<Integer, Integer> inMap = new HashMap<>();
+    static Map<Integer, Integer> preMap = new HashMap<>();
+
+
+    public static TreeNode buildTree(int[] preorder, int[] inorder) {
         for (int i = 0; i < inorder.length; i++) {
             inMap.put(inorder[i], i);
         }
-
-        int rootVal = preorder[i];
-        Integer leftNum = inMap.get(rootVal);
-        Integer rightNum = preorder.length - leftNum - 1;
-        int leftVal = preorder[i + 1];
-        int rightVal = preorder[i + leftNum + 1];
+        for (int i = 0; i < preorder.length; i++) {
+            preMap.put(i, preorder[i]);
+        }
+        return tree(0, 0, inorder.length - 1);
     }
 
+    private static TreeNode tree(int root, int left, int right) {
+        if (left > right) {
+            return null;
+        }
+        //获取根节点在中序遍历数组的位置.
+        Integer i = inMap.get(preMap.get(root));
+        //这实际上也是一棵树,只不过这个树的根节点做的事情比较复杂.
+        //前序创建对象.
+        TreeNode rootNode = new TreeNode(preMap.get(root));
+        TreeNode leftNode = tree(root + 1, left, i - 1);
+        TreeNode rightNode = tree(root + 1 + i - left, i + 1, right);
+        //后序指针指向.
+        rootNode.left = leftNode;
+        rootNode.right = rightNode;
+        return rootNode;
+    }
+
+    public static void main(String[] args) {
+        int[] preorder = {3, 9, 20, 15, 7};
+        int[] inorder = {9, 3, 15, 20, 7};
+        System.out.println(buildTree(preorder, inorder));
+    }
 }
 
 class IsBalanced {
