@@ -26,7 +26,7 @@ public class TreeNode {
     @Override
     public String toString() {
         return "TreeNode{" +
-                "value=" + value +
+                "val=" + val +
                 ", left=" + left +
                 ", right=" + right +
                 '}';
@@ -250,13 +250,16 @@ class TreeDeep {
 
 /**
  * 1.首先判断是分治,分析题意写逻辑(最为复杂)
- * 2.然后有左子树,右子树,会列出树状递归.分析应该在树状递归何处(前,中,后)进行剩余的逻辑.
+ * 2.然后有左子树,右子树,会列出树状递归.分析应该在树状递归何处(前,中,后)进行剩余的逻辑.有时候在哪处理都是一样的.
+ * todo:迭代做法
  */
 class BuildTree {
     static Map<Integer, Integer> inMap = new HashMap<>();
     static Map<Integer, Integer> preMap = new HashMap<>();
 
-
+    /**
+     * 通过中序和前序重建树.
+     */
     public static TreeNode buildTree(int[] preorder, int[] inorder) {
         for (int i = 0; i < inorder.length; i++) {
             inMap.put(inorder[i], i);
@@ -274,20 +277,48 @@ class BuildTree {
         //获取根节点在中序遍历数组的位置.
         Integer i = inMap.get(preMap.get(root));
         //这实际上也是一棵树,只不过这个树的根节点做的事情比较复杂.
-        //前序创建对象.
-        TreeNode rootNode = new TreeNode(preMap.get(root));
         TreeNode leftNode = tree(root + 1, left, i - 1);
+        TreeNode rootNode = new TreeNode(preMap.get(root));
         TreeNode rightNode = tree(root + 1 + i - left, i + 1, right);
-        //后序指针指向.
         rootNode.left = leftNode;
         rootNode.right = rightNode;
         return rootNode;
     }
 
     public static void main(String[] args) {
-        int[] preorder = {3, 9, 20, 15, 7};
-        int[] inorder = {9, 3, 15, 20, 7};
-        System.out.println(buildTree(preorder, inorder));
+        // int[] preorder = {3, 9, 20, 15, 7};
+        // int[] inorder = {9, 3, 15, 20, 7};
+        // System.out.println(buildTree(preorder, inorder));
+        int[] preorder = {8, 4, 5, 2, 9, 6, 7, 3, 1};
+        int[] inorder = {8, 4, 2, 5, 1, 9, 6, 3, 7};
+        System.out.println(buildTree2(preorder, inorder));
+    }
+
+    /**
+     * 通过中序和后序重建树.
+     */
+    public static TreeNode buildTree2(int[] preorder, int[] inorder) {
+        for (int i = 0; i < inorder.length; i++) {
+            inMap.put(inorder[i], i);
+        }
+        for (int i = 0; i < preorder.length; i++) {
+            preMap.put(i, preorder[i]);
+        }
+        return tree2(preorder.length - 1, 0, inorder.length - 1);
+    }
+
+    private static TreeNode tree2(int root, int left, int right) {
+        if (left > right) {
+            return null;
+        }
+        //获取当前根节点中序遍历数组位置
+        Integer i = inMap.get(preMap.get(root));
+        TreeNode leftNode = tree2(root - right + i - 1, left, i - 1);
+        TreeNode rightNode = tree2(root - 1, i + 1, right);
+        TreeNode rootNode = new TreeNode(preMap.get(root));
+        rootNode.left = leftNode;
+        rootNode.right = rightNode;
+        return rootNode;
     }
 }
 
@@ -313,5 +344,73 @@ class IsBalanced {
             return deep;
         }
         return -1;
+    }
+}
+
+/**
+ * 序列化和反序列化二叉树(层次遍历)
+ */
+class Codec {
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        Queue<TreeNode> queue = new LinkedList<TreeNode>() {{
+            add(root);
+        }};
+        List<Integer> nodes = new LinkedList<>();
+        int deep = deep(root);
+        while (deep != 0) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode poll = queue.poll();
+                if (poll == null) {
+                    nodes.add(null);
+                    queue.offer(null);
+                    queue.offer(null);
+                } else {
+                    nodes.add(poll.val);
+                    queue.offer(poll.left);
+                    queue.offer(poll.right);
+                }
+            }
+            deep--;
+        }
+        return Arrays.toString(nodes.toArray());
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String nodeString = data.substring(1, data.length() - 1);
+        String[] split = nodeString.split(",");
+        Queue<Integer> queue = new LinkedList();
+        for (String s : split) {
+            queue.offer(Integer.valueOf(s));
+        }
+        int deep = log(2, data.length() + 1);
+
+        return
+    }
+
+
+    private int deep(TreeNode root) {
+        return root == null ? 0 : Math.max(deep(root.left), deep(root.right)) + 1;
+    }
+
+    public static int log(int basement, int n) {
+        return ((Double) (Math.log(n) / Math.log(basement))).intValue();
+    }
+
+
+    public static void main(String[] args) {
+        TreeNode treeNode = new TreeNode(3);
+        TreeNode rootLeft = treeNode.left = new TreeNode(9);
+        TreeNode rootRight = treeNode.right = new TreeNode(20);
+        rootRight.left = new TreeNode(15);
+        rootRight.right = new TreeNode(7);
+        Codec codec = new Codec();
+        String serialize = codec.serialize(treeNode);
+        System.out.println(serialize);
     }
 }
