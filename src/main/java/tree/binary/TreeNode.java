@@ -31,6 +31,21 @@ public class TreeNode {
                 ", right=" + right +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TreeNode treeNode = (TreeNode) o;
+        return val == treeNode.val &&
+                left.equals(treeNode.left) &&
+                right.equals(treeNode.right);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(val, left, right);
+    }
 }
 
 /**
@@ -348,9 +363,10 @@ class IsBalanced {
 }
 
 /**
- * 序列化和反序列化二叉树(层次遍历)
+ * 序列化和反序列化二叉树(层次遍历),其实用前中后序遍历也可以
  */
 class Codec {
+    //todo:以后再看,先用前序和后序遍历的方式来.
     // Encodes a tree to a single string.
     public String serialize(TreeNode root) {
         if (root == null) {
@@ -380,18 +396,27 @@ class Codec {
         return Arrays.toString(nodes.toArray());
     }
 
-    // Decodes your encoded data to tree.
-    public TreeNode deserialize(String data) {
-        String nodeString = data.substring(1, data.length() - 1);
-        String[] split = nodeString.split(",");
-        Queue<Integer> queue = new LinkedList();
-        for (String s : split) {
-            queue.offer(Integer.valueOf(s));
-        }
-        int deep = log(2, data.length() + 1);
-
-        return
-    }
+    // // Decodes your encoded data to tree.
+    // public TreeNode deserialize(String data) {
+    //     String nodeString = data.substring(1, data.length() - 1);
+    //     String[] split = nodeString.split(",");
+    //     LinkedList<Integer> queue = new LinkedList();
+    //     for (String s : split) {
+    //         queue.offer(Integer.valueOf(s));
+    //     }
+    //     int deep = log(2, data.length() + 1);
+    //     Map<Integer,List> map = new HashMap<>();
+    //     for (int i = 0; i < deep; i++) {
+    //         LinkedList<Integer> subList = new LinkedList<>(queue.subList((int) Math.pow(2, i) - 1, (int) Math.pow(2, i + 1) - 1));
+    //         map.put(i,subList);
+    //     }
+    //     for (int i = 0; i < map.entrySet().size(); i++) {
+    //         List list = map.get(i);
+    //         List listNext = map.get(i + 1);
+    //         for (int i1 = 0; i1 < list.size(); i1++) {
+    //             list.get(i1)
+    //         }
+    //     }
 
 
     private int deep(TreeNode root) {
@@ -399,7 +424,7 @@ class Codec {
     }
 
     public static int log(int basement, int n) {
-        return ((Double) (Math.log(n) / Math.log(basement))).intValue();
+        return (int) (Math.log(n) / Math.log(basement));
     }
 
 
@@ -410,7 +435,123 @@ class Codec {
         rootRight.left = new TreeNode(15);
         rootRight.right = new TreeNode(7);
         Codec codec = new Codec();
-        String serialize = codec.serialize(treeNode);
+        String serialize = codec.serialize1(treeNode);
+        TreeNode treeNode1 = codec.deserialize1(serialize);
         System.out.println(serialize);
+        System.out.println(treeNode1);
     }
+
+    public String serialize1(TreeNode root) {
+        helper(root);
+        StringBuilder builder = new StringBuilder();
+        for (Integer node : listSe) {
+            builder.append(node);
+            builder.append(",");
+        }
+        return builder.toString();
+    }
+
+    List<Integer> listSe = new LinkedList<>();
+
+    private void helper(TreeNode root) {
+        if (root == null) {
+            listSe.add(null);
+            return;
+        }
+        listSe.add(root.val);
+        helper(root.left);
+        helper(root.right);
+    }
+
+    public TreeNode deserialize1(String data) {
+        String[] split = data.substring(0, data.length() - 1).split(",");
+        LinkedList<String> listDese = new LinkedList(Arrays.asList(split));
+        return deHelper(listDese);
+    }
+
+    private TreeNode deHelper(LinkedList<String> listDesc) {
+        String poll = listDesc.poll();
+        if (poll.equals("null")) {
+            return null;
+        }
+        TreeNode treeNode = new TreeNode(Integer.parseInt(poll));
+        TreeNode left = deHelper(listDesc);
+        TreeNode right = deHelper(listDesc);
+        treeNode.left = left;
+        treeNode.right = right;
+        return treeNode;
+    }
+}
+
+/**
+ * 二叉树的最近祖先
+ */
+class LowestCommonAncestor {
+    TreeNode treeNode;
+    Map<Integer, TreeNode> fatherMap = new HashMap<>();
+
+    /**
+     * @param root 二叉树
+     * @param p    子二叉树p
+     * @param q    子二叉树q
+     * @return 最深祖先二叉树
+     */
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        helper(root, p, q);
+        return treeNode;
+    }
+
+    /**
+     * 递归(后序遍历) 可以用外部变量进行标记结果,不一定在返回值中,返回值更多的是为了递归本身服务的.
+     */
+    private boolean helper(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) {
+            return false;
+        }
+        boolean left = helper(root.left, p, q);
+        boolean right = helper(root.right, p, q);
+        //判断自己是否是节点之一
+        boolean self = root.val == p.val || root.val == q.val;
+        if (left && right || (!right && self) || (!left && self)) {
+            treeNode = root;
+        }
+        //自己是节点也返回true,此时递归还没有上到上一层,还在这一层.
+        return left || right || self;
+    }
+
+    /**
+     * 迭代(记录二叉树的所有父节点.和森林化的那个类似
+     */
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        findFather(root);
+        List<Integer> pFatherTrace = new LinkedList<>();
+        while (p != null) {
+            pFatherTrace.add(p.val);
+            p = fatherMap.get(p.val);
+        }
+
+        while (q != null) {
+            if (pFatherTrace.contains(q.val)) {
+                return q;
+            }
+            q = fatherMap.get(q.val);
+        }
+        return null;
+    }
+
+    private void findFather(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        findFather(root.left);
+        findFather(root.right);
+        if (root.left != null) {
+            fatherMap.put(root.left.val, root);
+        }
+        if (root.right != null) {
+            fatherMap.put(root.right.val, root);
+        }
+    }
+
+
 }
